@@ -1,0 +1,37 @@
+pipeline{
+    agent {label 'SHOPIZER'}
+stages {
+    stage('scm') {
+        steps {
+            git url:'https://github.com/nagarjunaduggireddy/shopizer.git'
+                
+        }
+    }
+    stage('git merge'){
+        steps{
+            sh 'git branch -a'
+            sh 'git checkout developer'
+            sh 'git checkout release'
+            sh 'git branch -a'
+            sh 'git merge developer --no-ff'
+            sh 'git push -u origin release'
+        }
+    }
+    
+    stage('artifactorydeploy') {
+        steps {
+            rtMavenDeployer  id : 'MAVEN_DEPLOYER',
+                    releaseRepo: 'default-libs-release-local',
+                    snapshotRepo: 'default-libs-snapshot-local',
+                       serverId : 'Shopizer-Artifact'
+        }
+    }
+    stage('artifactoryrun') {
+        steps {
+            rtMavenRun  pom : 'pom.xml',
+                      goals : 'clean install',
+                  deployerId: "MAVEN_DEPLOYER"
+        }
+    }
+  }
+}
