@@ -8,12 +8,27 @@ pipeline{
                 branch: 'developer'
         }
     }
-    stage('Build the Code') {
-        steps {
-            withSonarQubeEnv('SONAR_SELF_HOSTED') {
-            sh script: 'mvn package sonar:sonar'
-            }
+        stage('artifactorydeploy') {
+           steps {
+            rtMavenDeployer  id : 'MAVEN_DEPLOYER',
+                    releaseRepo: 'default-libs-release-local',
+                    snapshotRepo: 'default-libs-snapshot-local',
+                       serverId : 'shopizer_jfrog'
         }
     }
-}
+        stage('Build the Code') {
+            steps {
+                withSonarQubeEnv('SONAR_SELF_HOSTED') {
+                    sh script: 'mvn clean package sonar:sonar'
+                }
+            }
+        }
+        stage('artifactoryrun') {
+        steps {
+            rtMavenRun   pom : 'pom.xml',
+                         goals : 'package',
+                        deployerId: "MAVEN_DEPLOYER"
+        }
+    }
+  }
 }
