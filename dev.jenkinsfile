@@ -1,7 +1,7 @@
 pipeline{
     agent {label 'SHOPIZER'}
     parameters {
-        string(name: 'MAVEN_GOAL', defaultValue: 'clean install', description: 'maven goal')
+        string(name: 'MAVEN_GOAL', defaultValue: 'clean package', description: 'maven goal')
     }
     triggers { pollSCM('* * * * *') }
     stages {
