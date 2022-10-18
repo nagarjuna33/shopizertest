@@ -1,0 +1,18 @@
+pipeline{
+    agent {label 'SHOPIZER'}
+    triggers { pollSCM('* * * * *') }
+    stages {
+    stage('scm') {
+        steps {
+            git url:'https://github.com/nagarjunaduggireddy/shopizer.git',
+                branch: 'developer'
+        }
+    }
+    stage('Build the Code') {
+        steps {
+            withSonarQubeEnv('SONAR_SELF_HOSTED') {
+            sh script: 'mvn package sonar:sonar'
+            }
+        }
+    }
+}
