@@ -30,7 +30,7 @@ stages {
         stage('artifactoryrun') {
         steps {
             rtMavenRun   pom : 'pom.xml',
-                         goals : 'clean install',
+                         goals : 'install',
                         deployerId: "MAVEN_DEPLOYER"
         }
     }
