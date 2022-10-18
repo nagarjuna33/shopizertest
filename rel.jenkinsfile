@@ -1,0 +1,35 @@
+pipeline{
+    agent {label 'SHOPIZER'}
+     triggers { cron('30 18 * * *') }
+stages {
+    stage('scm') {
+        steps {
+            git url:'https://github.com/nagarjunaduggireddy/shopizer.git',
+                branch: 'release'
+        }
+    }
+    
+        stage('artifactorydeploy') {
+           steps {
+            rtMavenDeployer  id : 'MAVEN_DEPLOYER',
+                    releaseRepo: 'default-libs-release-local',
+                    snapshotRepo: 'default-libs-snapshot-local',
+                       serverId : 'Shopizer-Artifact'
+        }
+    }
+        stage('Build the Code') {
+            steps {
+                withSonarQubeEnv('SONAR_SELF_HOSTED') {
+                    sh script: 'mvn clean package sonar:sonar'
+                }
+            }
+        }
+        stage('artifactoryrun') {
+        steps {
+            rtMavenRun   pom : 'pom.xml',
+                         goals : 'package',
+                        deployerId: "MAVEN_DEPLOYER"
+        }
+    }
+  }
+}
